@@ -13,6 +13,7 @@ fun Application.configureSockets() {
         maxFrameSize = Long.MAX_VALUE
         masking = false
     }
+
     routing {
         webSocket("/ws") { // websocketSession
             for (frame in incoming) {

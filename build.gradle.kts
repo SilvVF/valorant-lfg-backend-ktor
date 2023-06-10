@@ -1,3 +1,5 @@
+import io.ktor.plugin.features.*
+
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
@@ -28,6 +30,8 @@ repositories {
 }
 
 dependencies {
+    val kgraphql_version = "0.19.0"
+
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-auth-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-sessions-jvm:$ktor_version")
@@ -40,4 +44,12 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+
+    // https://kgraphql.io/
+    implementation("com.apurebase:kgraphql:$kgraphql_version")      // <-- Add these two lines
+    implementation("com.apurebase:kgraphql-ktor:$kgraphql_version")
+
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+
+    implementation("com.google.code.gson:gson:2.9.0") // Gradle KTS
 }
