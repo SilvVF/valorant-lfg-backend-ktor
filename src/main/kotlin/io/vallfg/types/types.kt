@@ -1,9 +1,13 @@
 package io.vallfg.types
 
 
-data class PlayerData (
+data class Player (
     val name: String,
     val tag: String,
+    val signedIn: Boolean,
+    val data: PlayerData
+)
+data class PlayerData (
     val seasonId:  String,
     val seasonName:            String,
     val playlist:               String,

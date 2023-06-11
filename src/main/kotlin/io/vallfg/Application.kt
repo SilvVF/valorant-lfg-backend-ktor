@@ -83,7 +83,6 @@ fun Application.module() {
         maxFrameSize = Long.MAX_VALUE
         masking = false
     }
-    println(getPlayerData("silv", "004").getRankedDataOrNull("silv", "004"))
     configureWs()
 }
 
