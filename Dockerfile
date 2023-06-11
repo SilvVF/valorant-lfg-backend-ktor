@@ -4,4 +4,4 @@ RUN apk add --no-cache bash
 
 WORKDIR /valorant-lfg
 
-CMD ./gradlew run
+CMD ./gradlew run --watch-fs && ./gradlew -t installDist
