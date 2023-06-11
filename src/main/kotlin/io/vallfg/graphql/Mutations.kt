@@ -25,21 +25,20 @@ class LoginAsPlayerMutation: Mutation {
             ?: error("unable to get current session")
 
         val session: LfgSession = sessions.get<LfgSession>() ?: run {
-            val newSession = LfgSession(id = UUID.randomUUID().toString())
+            val newSession = LfgSession(id = UUID.randomUUID().toString(), "")
             sessions.set("LFG_SESSION", newSession)
             return@run newSession
         }
 
-        val data = getPlayerData(name, tag).getRankedDataOrNull()
-            ?: error("could not find player")
-
-        sessionIdToPlayerData[session.id] = data
-
-        return Player(
+        val player = Player(
             name = name,
             tag = tag,
             signedIn = true,
-            data = data
+            data = getPlayerData(name, tag).getRankedDataOrNull()
+                ?: error("could not find player")
         )
+
+        sessionIdToPlayerData[session.id] = player
+        return player
     }
 }
