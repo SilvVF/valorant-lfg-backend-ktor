@@ -1,8 +1,8 @@
 package io.vallfg
 
 import io.vallfg.types.PlayerData
-import io.vallfg.trn.player_data1.TrnPlayerData
-import io.vallfg.trn.player_data1.toPlayerData
+import io.vallfg.trn.player_data.TrnPlayerData
+import io.vallfg.trn.player_data.toPlayerData
 
 /**
  * Util Object for getting different times in seconds.

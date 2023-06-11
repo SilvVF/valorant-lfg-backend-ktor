@@ -1,7 +1,9 @@
 package io.vallfg.trn
 
+import io.vallfg.json
+import io.vallfg.trn.player_data.TrnPlayerData
 import okhttp3.*
-import io.vallfg.trn.player_data1.TrnPlayerData
+import io.vallfg.types.PlayerData
 
 
 private val client = OkHttpClient.Builder()
@@ -44,5 +46,5 @@ fun getPlayerData(
 
     val jsonString = "{${slicedData}}"
 
-    io.vallfg.gson.fromJson(jsonString, TrnPlayerData::class.java)
+    return@runCatching json.decodeFromString(jsonString)
 }

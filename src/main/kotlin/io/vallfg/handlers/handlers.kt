@@ -10,7 +10,7 @@ import io.vallfg.middleware.LfgSession
 import io.vallfg.middleware.sessionIdToPlayerData
 import io.vallfg.responses.LoginResponse
 import io.vallfg.trn.getPlayerData
-import io.vallfg.trn.player_data1.toPlayerData
+import io.vallfg.trn.player_data.toPlayerData
 import java.util.*
 
 suspend fun PipelineContext<Unit, ApplicationCall>.loginHandler() {
