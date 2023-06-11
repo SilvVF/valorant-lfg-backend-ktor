@@ -11,6 +11,7 @@ import io.vallfg.middleware.sessionIdToPlayerData
 import io.vallfg.responses.LoginResponse
 import io.vallfg.trn.getPlayerData
 import io.vallfg.trn.player_data.toPlayerData
+import io.vallfg.types.Player
 import java.util.*
 
 suspend fun PipelineContext<Unit, ApplicationCall>.loginHandler() {
@@ -32,7 +33,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.loginHandler() {
         .getOrNull()
         ?.segments
         ?.first()
-        ?.toPlayerData(name, tag)
+        ?.toPlayerData()
 
     if (data == null) {
         call.respondText(
@@ -42,11 +43,11 @@ suspend fun PipelineContext<Unit, ApplicationCall>.loginHandler() {
         return
     }
 
-    val session = call.principal<LfgSession>() ?: LfgSession(id = UUID.randomUUID().toString())
+    val session = call.principal<LfgSession>() ?: LfgSession(id = UUID.randomUUID().toString(), "")
 
     call.sessions.set(session)
 
-    sessionIdToPlayerData[session.id] = data
+    sessionIdToPlayerData[session.id] = Player(name, tag, true, data)
 
     call.respond(
         status = HttpStatusCode.OK,

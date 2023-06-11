@@ -6,16 +6,20 @@ import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
 import io.vallfg.Time
+import io.vallfg.lfg_server.ClientId
+import io.vallfg.lfg_server.PostId
+import io.vallfg.types.Player
 import io.vallfg.types.PlayerData
 import java.util.concurrent.ConcurrentHashMap
 
 data class LfgSession(
-    val id: String,
+    val id: ClientId,
+    var joinedPostId: PostId
 ): Principal
 
-typealias SessionStore = ConcurrentHashMap<String, PlayerData>
+typealias SessionStore = ConcurrentHashMap<String, Player>
 
-val sessionIdToPlayerData: SessionStore = ConcurrentHashMap<String, PlayerData>()
+val sessionIdToPlayerData: SessionStore = ConcurrentHashMap<String, Player>()
 
 fun Application.configureMiddleware() {
 

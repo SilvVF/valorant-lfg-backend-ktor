@@ -12,10 +12,8 @@ data class TrnPlayerData (
 
 )
 
-fun Segments.toPlayerData(name: String, tag: String): PlayerData? = if (metadata != null && stats != null) {
+fun Segments.toPlayerData(): PlayerData? = if (metadata != null && stats != null) {
     PlayerData(
-        name = name,
-        tag = tag,
         seasonId = metadata.actId ?: "",
         seasonName = metadata.actName ?: "" ,
         playlist = attributes?.playlist ?: "",

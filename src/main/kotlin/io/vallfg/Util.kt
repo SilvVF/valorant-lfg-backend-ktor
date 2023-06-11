@@ -19,9 +19,9 @@ object Time {
 }
 
 
-fun Result<TrnPlayerData>.getRankedDataOrNull(name: String, tag: String): PlayerData? {
+fun Result<TrnPlayerData>.getRankedDataOrNull(): PlayerData? {
     return this.getOrNull()
         ?.segments
         ?.first()
-        ?.toPlayerData(name, tag)
+        ?.toPlayerData()
 }
