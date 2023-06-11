@@ -12,12 +12,12 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "1.8.22"
 }
 
-group = "vallfg.io"
+group = "io.vallfg"
 version = "0.0.1"
 
 
 application {
-    mainClass.set("vallfg.io.ApplicationKt")
+    mainClass.set("io.vallfg.ApplicationKt")
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
     java.toolchain {
@@ -30,8 +30,6 @@ repositories {
 }
 
 dependencies {
-    val kgraphql_version = "0.19.0"
-
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-auth-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-sessions-jvm:$ktor_version")
@@ -45,9 +43,9 @@ dependencies {
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 
-    // https://kgraphql.io/
-    implementation("com.apurebase:kgraphql:$kgraphql_version")      // <-- Add these two lines
-    implementation("com.apurebase:kgraphql-ktor:$kgraphql_version")
+    implementation("com.expediagroup", "graphql-kotlin-ktor-server", "7.0.0-alpha.6")
+
+    implementation("io.ktor:ktor-server-sessions:$ktor_version")
 
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
 
