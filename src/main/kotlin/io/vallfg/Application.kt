@@ -20,7 +20,6 @@ import io.vallfg.graphql.HelloWorldQuery
 import io.vallfg.graphql.LoginAsPlayerMutation
 import io.vallfg.handlers.loginHandler
 import io.vallfg.lfg_server.LfgServer
-import io.vallfg.lfg_server.lfgWebsocket
 import io.vallfg.middleware.configureMiddleware
 import kotlinx.serialization.json.Json
 import org.slf4j.event.*
@@ -77,9 +76,6 @@ fun Application.module() {
 
     val server = LfgServer()
 
-    lfgWebsocket(lfgServer = server) { conn, sessId, msg ->
-
-    }
 }
 
 
