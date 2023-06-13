@@ -1,6 +1,8 @@
 package io.vallfg.lfg_server
 
-import io.vallfg.types.Player
+import io.ktor.server.application.*
+import io.ktor.websocket.*
+import java.lang.IllegalStateException
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -11,11 +13,49 @@ class LfgServer {
     private val posts = ConcurrentHashMap<PostId, PostServer>()
     private val users = ConcurrentHashMap<ClientId, PostId>()
 
-    suspend fun createPost(
+    fun start(app: Application) = app.configureLfgWebsockets(
+            onJoined = { user, postId ->
+                joinPost(user, user.session.id, postId)
+                    .onSuccess {
+                        user.session.joinedPostId = postId
+                    }
+                    .onFailure {
+                        user.conn.close(
+                            CloseReason(
+                                code = CloseReason.Codes.VIOLATED_POLICY,
+                                message = "failed to join post with postId=[$postId]"
+                            )
+                        )
+                    }
+            },
+            onCreated = { user, needed, minRank, gameMode ->
+                createPost(
+                    user = user,
+                    clientId = user.session.id,
+                    config =  {
+                        setGameMode(gameMode)
+                        setNeeded(needed)
+                        setMinRank(minRank)
+                    }
+                )
+                    .onSuccess { postId ->
+                        user.session.joinedPostId = postId
+                    }
+            },
+            onDisconnect = { user ->
+
+            },
+            onReceived = { user, msg ->
+
+            }
+    )
+
+    private suspend fun createPost(
         user: User,
         clientId: ClientId,
         config: PostConfig.Builder.() -> Unit
-    ): PostId {
+    ): Result<String> {
+
         val postId = UUID.randomUUID().toString()
 
         posts[postId] = PostServer(
@@ -25,16 +65,22 @@ class LfgServer {
         )
         users[clientId] = postId
 
-        return postId
+        return Result.success(postId)
     }
 
-    suspend fun joinPost(user: User, clientId: ClientId, postId: PostId): PostId {
+    private suspend fun joinPost(user: User, clientId: ClientId, postId: PostId): Result<Boolean> {
 
-        posts[postId]?.joinPost(user)
+        val joined = posts[postId]
+            ?.joinPost(user)
+            ?: return Result.failure(IllegalStateException())
+
+        if (!joined) {
+            return Result.failure(IllegalStateException())
+        }
 
         users[clientId] = postId
 
-        return postId
+        return Result.success(true)
     }
 
     suspend fun leavePost(user: User, clientId: ClientId, postId: PostId): Boolean {
