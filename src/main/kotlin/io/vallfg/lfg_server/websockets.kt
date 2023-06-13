@@ -13,7 +13,7 @@ import io.vallfg.types.Player
 import io.vallfg.types.WsData
 import java.time.Duration
 
-fun Application.lfgWebsocket(
+fun Application.configureLfgWebsockets(
     config: WebSockets.WebSocketOptions.() -> Unit = {
         pingPeriod = Duration.ofSeconds(15)
         timeout = Duration.ofSeconds(15)

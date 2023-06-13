@@ -3,13 +3,11 @@ package io.vallfg.graphql
 import com.expediagroup.graphql.server.operations.Mutation
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.server.sessions.*
-import io.vallfg.LfgContextFactory
 import io.vallfg.getRankedDataOrNull
 import io.vallfg.middleware.LfgSession
 import io.vallfg.middleware.sessionIdToPlayerData
 import io.vallfg.trn.getPlayerData
 import io.vallfg.types.Player
-import io.vallfg.types.PlayerData
 import java.util.UUID
 
 

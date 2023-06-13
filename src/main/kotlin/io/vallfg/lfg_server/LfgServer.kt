@@ -13,7 +13,44 @@ class LfgServer {
     private val posts = ConcurrentHashMap<PostId, PostServer>()
     private val users = ConcurrentHashMap<ClientId, PostId>()
 
-    suspend fun createPost(
+    fun start(app: Application) = app.configureLfgWebsockets(
+            onJoined = { user, postId ->
+                joinPost(user, user.session.id, postId)
+                    .onSuccess {
+                        user.session.joinedPostId = postId
+                    }
+                    .onFailure {
+                        user.conn.close(
+                            CloseReason(
+                                code = CloseReason.Codes.VIOLATED_POLICY,
+                                message = "failed to join post with postId=[$postId]"
+                            )
+                        )
+                    }
+            },
+            onCreated = { user, needed, minRank, gameMode ->
+                createPost(
+                    user = user,
+                    clientId = user.session.id,
+                    config =  {
+                        setGameMode(gameMode)
+                        setNeeded(needed)
+                        setMinRank(minRank)
+                    }
+                )
+                    .onSuccess { postId ->
+                        user.session.joinedPostId = postId
+                    }
+            },
+            onDisconnect = { user ->
+
+            },
+            onReceived = { user, msg ->
+
+            }
+    )
+
+    private suspend fun createPost(
         user: User,
         clientId: ClientId,
         config: PostConfig.Builder.() -> Unit
@@ -53,44 +90,5 @@ class LfgServer {
         users.remove(clientId)
 
         return true
-    }
-
-    suspend fun start(app: Application) {
-        app.lfgWebsocket(
-            onJoined = { user, postId ->
-               joinPost(user, user.session.id, postId)
-                   .onSuccess {
-                       user.session.joinedPostId = postId
-                   }
-                   .onFailure {
-                       user.conn.close(
-                           CloseReason(
-                               code = CloseReason.Codes.VIOLATED_POLICY,
-                               message = "failed to join post with postId=[$postId]"
-                           )
-                       )
-                   }
-            },
-            onCreated = { user, needed, minRank, gameMode ->
-               createPost(
-                   user = user,
-                   clientId = user.session.id,
-                   config =  {
-                       setGameMode(gameMode)
-                       setNeeded(needed)
-                       setMinRank(minRank)
-                   }
-               )
-                   .onSuccess { postId ->
-                       user.session.joinedPostId = postId
-                   }
-            },
-            onDisconnect = { user ->
-
-            },
-            onReceived = { user, msg ->
-
-            }
-        )
     }
 }

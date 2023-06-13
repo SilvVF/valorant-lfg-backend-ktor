@@ -3,6 +3,7 @@ package io.vallfg
 import io.vallfg.types.PlayerData
 import io.vallfg.trn.player_data.TrnPlayerData
 import io.vallfg.trn.player_data.toPlayerData
+import kotlinx.serialization.json.Json
 
 /**
  * Util Object for getting different times in seconds.
@@ -24,4 +25,10 @@ fun Result<TrnPlayerData>.getRankedDataOrNull(): PlayerData? {
         ?.segments
         ?.first()
         ?.toPlayerData()
+}
+
+val json = Json {
+    isLenient = true
+    prettyPrint = true
+    ignoreUnknownKeys = true
 }
