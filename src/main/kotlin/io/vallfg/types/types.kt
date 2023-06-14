@@ -9,6 +9,8 @@ data class Player (
 )
 
 data class PlayerData (
+    val name: String,
+    val tag: String,
     val seasonId:  String,
     val seasonName:            String,
     val playlist:               String,

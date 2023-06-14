@@ -20,11 +20,11 @@ object Time {
 }
 
 
-fun Result<TrnPlayerData>.getRankedDataOrNull(): PlayerData? {
+fun Result<TrnPlayerData>.getRankedDataOrNull(name: String, tag: String): PlayerData? {
     return this.getOrNull()
         ?.segments
         ?.first()
-        ?.toPlayerData()
+        ?.toPlayerData(name, tag)
 }
 
 val json = Json {
