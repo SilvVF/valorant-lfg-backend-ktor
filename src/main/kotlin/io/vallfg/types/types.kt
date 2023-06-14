@@ -7,6 +7,7 @@ data class Player (
     val signedIn: Boolean,
     val data: PlayerData
 )
+
 data class PlayerData (
     val seasonId:  String,
     val seasonName:            String,

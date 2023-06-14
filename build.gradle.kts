@@ -1,11 +1,12 @@
-import io.ktor.plugin.features.*
-
 val ktor_version: String by project
 val kotlin_version: String by project
-val logback_version: String = "1.4.7"
+val logback_version: String by project
 val postgres_version: String by project
+val exposed_version: String by project
+val h2_version: String by project
 
 plugins {
+    application
     kotlin("jvm") version "1.8.22"
     id("io.ktor.plugin") version "2.3.1"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.8.22"
@@ -42,6 +43,11 @@ dependencies {
     implementation("io.ktor:ktor-server-call-logging-jvm:2.3.1")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+
+    implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
+    implementation("com.h2database:h2:$h2_version")
 
     implementation("com.expediagroup", "graphql-kotlin-ktor-server", "7.0.0-alpha.6")
 

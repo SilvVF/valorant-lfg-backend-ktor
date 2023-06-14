@@ -3,6 +3,7 @@ package io.vallfg
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.vallfg.database.configureDb
 import io.vallfg.graphql.configureGraphQL
 import io.vallfg.handlers.configureRestRouting
 import io.vallfg.lfg_server.LfgServer
@@ -14,10 +15,12 @@ fun main() {
         .start(wait = true)
 }
 
+
 fun Application.module() {
     configureMiddleware()
     configureGraphQL()
     configureRestRouting()
+    configureDb()
 
     val server = LfgServer()
 

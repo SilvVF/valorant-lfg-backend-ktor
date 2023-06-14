@@ -1,0 +1,40 @@
+package io.vallfg.database
+
+import org.jetbrains.exposed.sql.Table
+
+object Players : Table() {
+    val id = text("id")
+    val seasonId = text("seasonId")
+    val seasonName = text("seasonName")
+    val playlist = text("playlist")
+    val rank = text("rank")
+    val iconUrl = text("iconUrl")
+    val matchesPlayed = integer("matchesPlayed")
+    val matchWinPct = float("matchWinPct")
+    val kills = integer("kills")
+    val killsPercentile= float("killsPercentile")
+    val killsPerRound= float("killsPerRound")
+    val killsPerMatch= float("killsPerMatch")
+    val scorePerRound= float("scorePerRound")
+    val scorePerRoundPercentile= float("scorePerRoundPercentile")
+    val assists = float("assists")
+    val assistsPerRound= float("assistsPerRound")
+    val assistsPerMatch= float("assistsPerMatch")
+    val kd= float("kd")
+    val kdPercentile= float("kdPercentile")
+    val kda= float("kda")
+    val dmgPerRound= float("dmgPerRound")
+    val headshotPct= float("headshotPct")
+    val headshotPctPercentile= float("headshotPctPercentile")
+    val econRating= float("econRating")
+    val firstBloodsPerMatch= float("firstBloodsPerMatch")
+    val firstDeathsPerRound= float("firstDeathsPerRound")
+    val mostKillsInMatch=integer("mostKillsInMatch")
+    val timePlayed= float("timePlayed")
+    val trnPerformanceScore= float("trnPerformanceScore")
+    val peakRank=text("peakRank")
+    val peakRankIconUrl=text("peakRankIconUrl")
+    val peakRankActName=text("peakRankActName")
+
+    override val primaryKey = PrimaryKey(id, name = "PK_Player_ID")
+}
