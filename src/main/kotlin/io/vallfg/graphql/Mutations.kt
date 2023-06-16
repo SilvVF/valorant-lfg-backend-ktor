@@ -3,6 +3,7 @@ package io.vallfg.graphql
 import com.expediagroup.graphql.server.operations.Mutation
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.server.sessions.*
+import io.vallfg.database.playerDao
 import io.vallfg.getRankedDataOrNull
 import io.vallfg.middleware.LfgSession
 import io.vallfg.middleware.sessionIdToPlayerData
@@ -28,12 +29,16 @@ class LoginAsPlayerMutation: Mutation {
             return@run newSession
         }
 
+        val playerData = getPlayerData(name, tag).getRankedDataOrNull(name, tag)
+            ?: error("could not find player")
+
+        val entity = playerDao.insertPlayer(playerData)
+
         val player = Player(
             name = name,
             tag = tag,
             signedIn = true,
-            data = getPlayerData(name, tag).getRankedDataOrNull()
-                ?: error("could not find player")
+            data = playerData
         )
 
         sessionIdToPlayerData[session.id] = player

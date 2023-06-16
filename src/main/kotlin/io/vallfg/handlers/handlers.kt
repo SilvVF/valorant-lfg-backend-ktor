@@ -33,7 +33,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.loginHandler() {
         .getOrNull()
         ?.segments
         ?.first()
-        ?.toPlayerData()
+        ?.toPlayerData(name, tag)
 
     if (data == null) {
         call.respondText(

@@ -17,12 +17,16 @@ fun main() {
 
 
 fun Application.module() {
-    configureMiddleware()
-    configureGraphQL()
-    configureRestRouting()
-    configureDb()
 
-    val server = LfgServer()
+    val server = LfgServer(
+        dev = true
+    )
+
+    configureDb()
+    configureMiddleware()
+    configureGraphQL(server)
+    configureRestRouting()
+
 
     server.start(this@module)
 }
