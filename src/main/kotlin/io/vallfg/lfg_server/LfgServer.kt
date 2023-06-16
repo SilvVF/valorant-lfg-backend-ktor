@@ -1,17 +1,44 @@
 package io.vallfg.lfg_server
 
 import io.ktor.server.application.*
+import io.ktor.server.websocket.*
 import io.ktor.websocket.*
+import io.vallfg.middleware.LfgSession
+import io.vallfg.testUser
+import io.vallfg.types.Message
+import io.vallfg.types.Player
+import io.vallfg.types.PlayerData
 import java.lang.IllegalStateException
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 typealias PostId = String
 typealias ClientId = String
-class LfgServer {
+class LfgServer(
+    val dev: Boolean
+) {
+    val posts = ConcurrentHashMap<PostId, PostServer>()
+    val users = ConcurrentHashMap<ClientId, PostId>()
 
-    private val posts = ConcurrentHashMap<PostId, PostServer>()
-    private val users = ConcurrentHashMap<ClientId, PostId>()
+    init {
+        if (dev) {
+            repeat(100) {
+
+                val  id = UUID.randomUUID().toString()
+
+                posts[id] = PostServer(
+                    users = mutableListOf(testUser),
+                    creator = testUser,
+                    config = PostConfig.Builder()
+                        .setGameMode(listOf("competitive", "unrated").random())
+                        .setNeeded((1..4).random())
+                        .setMinRank(listOf("Immortal1", "Unranked","Diamond3").random())
+                        .build()
+                )
+            }
+        }
+    }
+
 
     fun start(app: Application) = app.configureLfgWebsockets(
             onJoined = { user, postId ->
@@ -46,7 +73,9 @@ class LfgServer {
 
             },
             onReceived = { user, msg ->
-
+                when(msg){
+                    is Message -> TODO()
+                }
             }
     )
 

@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 
 
 class PlayerDao(
-    db: Database,
+    private val db: Database,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
     suspend fun getPlayer(name: String, tag: String) =

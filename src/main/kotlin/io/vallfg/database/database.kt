@@ -12,13 +12,12 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 
 
-lateinit var db: Database
 
 lateinit var playerDao: PlayerDao
 
 fun Application.configureDb() {
 
-    db = Database.connect(
+    val db = Database.connect(
         url = "jdbc:postgresql://db:5432/valplayerdb?user=valplayerdbuser",
         user = "valplayerdbuser",
         driver = "org.postgresql.Driver",

@@ -18,9 +18,9 @@ data class User(
 class PostServer(
     private val creator: User,
     private val banned: MutableList<User> = mutableListOf(),
-    private val users: MutableList<User>,
+    val users: MutableList<User>,
     private val messages: MutableList<Message> = mutableListOf(),
-    private val config: PostConfig
+    val config: PostConfig
 ) {
 
     private val mutex: Mutex = Mutex()
