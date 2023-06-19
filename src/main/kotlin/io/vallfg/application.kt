@@ -8,6 +8,7 @@ import io.vallfg.graphql.configureGraphQL
 import io.vallfg.handlers.configureRestRouting
 import io.vallfg.lfg_server.LfgServer
 import io.vallfg.middleware.configureMiddleware
+import io.vallfg.websockets.configureWebsocket
 
 
 fun main() {
@@ -18,16 +19,12 @@ fun main() {
 
 fun Application.module() {
 
-    val server = LfgServer(
-        dev = true
-    )
+    val server = LfgServer()
 
     configureDb()
     configureMiddleware()
     configureGraphQL(server)
     configureRestRouting()
-
-
-    server.start(this@module)
+    configureWebsocket(server)
 }
 

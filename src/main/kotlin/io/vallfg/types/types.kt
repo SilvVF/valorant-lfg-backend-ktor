@@ -1,8 +1,10 @@
 package io.vallfg.types
 
 import io.vallfg.database.PlayerEntity
+import kotlinx.serialization.Serializable
 
 
+@Serializable
 data class Player (
     val name: String,
     val tag: String,
@@ -53,6 +55,7 @@ fun PlayerEntity.toPlayer(): Player {
     )
 }
 
+@Serializable
 data class PlayerData (
     val name: String,
     val tag: String,
@@ -95,5 +98,5 @@ data class Post(
     val gameMode: String,
     val needed: Int,
     val players: List<List<String>>,
-    val createdAt: String,
+    val createdAtEpochSecond: Double,
 )
