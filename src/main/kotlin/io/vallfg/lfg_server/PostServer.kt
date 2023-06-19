@@ -4,8 +4,6 @@ import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import io.vallfg.Time
 import io.vallfg.json
-import io.vallfg.middleware.LfgSession
-import io.vallfg.types.*
 import io.vallfg.websockets.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,6 +44,21 @@ class PostServer(
             user.conn,
             PlayerJoined(user.player)
         )
+        user.conn.send(
+            Frame.Text(
+                json.encodeToString(
+                    OutWsData.serializer(),
+                    PostState(
+                        creator.player,
+                        users.map { it.player },
+                        messages,
+                        config.minRank.string,
+                        config.needed,
+                        config.gameMode.string
+                    )
+                )
+            )
+        )
         return JoinPostError.None
     }
 
@@ -77,6 +90,7 @@ class PostServer(
                 sentAtEpochSecond = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
             ).also {
                 data.messages.add(it)
+                messages = messages + it
             }
         )
         return MessageError.None
