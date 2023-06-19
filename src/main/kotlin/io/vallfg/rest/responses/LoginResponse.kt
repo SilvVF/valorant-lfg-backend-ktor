@@ -1,4 +1,4 @@
-package io.vallfg.responses
+package io.vallfg.rest.responses
 
 import io.vallfg.types.PlayerData
 

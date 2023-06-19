@@ -5,7 +5,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.vallfg.database.configureDb
 import io.vallfg.graphql.configureGraphQL
-import io.vallfg.handlers.configureRestRouting
+import io.vallfg.rest.configureRestRouting
 import io.vallfg.lfg_server.LfgServer
 import io.vallfg.middleware.configureMiddleware
 import io.vallfg.websockets.configureWebsocket

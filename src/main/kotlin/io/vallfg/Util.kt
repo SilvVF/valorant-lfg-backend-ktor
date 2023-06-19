@@ -14,6 +14,7 @@ import io.vallfg.types.PlayerData
 import io.vallfg.trn.player_data.TrnPlayerData
 import io.vallfg.trn.player_data.toPlayerData
 import io.vallfg.types.Player
+import io.vallfg.websockets.WsPlayerData
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -50,47 +51,42 @@ val json = Json {
 }
 
 val testUser = User(
-        session = LfgSession("sdkjfakj", "dfkjakflj"),
-        player = Player(
-            name = "Silv",
-            tag = "004",
-            signedIn = true,
-            data = PlayerData(
-                name = "silv",
-                tag = "004",
-                kd = 1.4,
-                kda = 1.4,
-                headshotPct = 22.0,
-                matchWinPct = 22.33,
-                matchesPlayed = 2,
-                killsPerMatch = 23.0,
-                mostKillsInMatch = 55,
-                rank = "Unranked",
-                iconUrl = "https://trackercdn.com/cdn/tracker.gg/valorant/icons/tiersv2/0.png",
-                trnPerformanceScore = 978.0,
-                kills = 2344,
-                killsPercentile = 10.00,
-                killsPerRound = 2.21,
-                playlist = "Ranked",
-                seasonName = "Act 2 Season 3",
-                seasonId = "398745982379827",
-                scorePerRound = 235.34,
-                scorePerRoundPercentile = 39.00,
-                assists = 123,
-                assistsPerMatch = 6.0,
-                assistsPerRound = 1.0,
-                peakRank = "DiamondIII",
-                peakRankActName = "Act 2 Season 2",
-                firstDeathsPerRound = 0.0,
-                kdPercentile = 99.00,
-                dmgPerRound = 99.0,
-                headshotPctPercentile = 99.0,
-                econRating = 344.0,
-                firstBloodsPerMatch = 4.0,
-                timePlayed = 342,
-                peakRankIconUrl = "https://trackercdn.com/cdn/tracker.gg/valorant/icons/tiersv2/20.png"
-            ),
-        ),
+    player = WsPlayerData(
+        clientId = "12345",
+        name = "silv",
+        tag = "004",
+        kd = 1.4,
+        kda = 1.4,
+        headshotPct = 22.0,
+        matchWinPct = 22.33,
+        matchesPlayed = 2,
+        killsPerMatch = 23.0,
+        mostKillsInMatch = 55,
+        rank = "Unranked",
+        iconUrl = "https://trackercdn.com/cdn/tracker.gg/valorant/icons/tiersv2/0.png",
+        trnPerformanceScore = 978.0,
+        kills = 2344,
+        killsPercentile = 10.00,
+        killsPerRound = 2.21,
+        playlist = "Ranked",
+        seasonName = "Act 2 Season 3",
+        seasonId = "398745982379827",
+        scorePerRound = 235.34,
+        scorePerRoundPercentile = 39.00,
+        assists = 123,
+        assistsPerMatch = 6.0,
+        assistsPerRound = 1.0,
+        peakRank = "DiamondIII",
+        peakRankActName = "Act 2 Season 2",
+        firstDeathsPerRound = 0.0,
+        kdPercentile = 99.00,
+        dmgPerRound = 99.0,
+        headshotPctPercentile = 99.0,
+        econRating = 344.0,
+        firstBloodsPerMatch = 4.0,
+        timePlayed = 342,
+        peakRankIconUrl = "https://trackercdn.com/cdn/tracker.gg/valorant/icons/tiersv2/20.png"
+    ),
     conn = TestSession()
 )
 
