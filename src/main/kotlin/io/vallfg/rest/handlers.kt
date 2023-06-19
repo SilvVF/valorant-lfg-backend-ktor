@@ -1,4 +1,4 @@
-package io.vallfg.handlers
+package io.vallfg.rest
 
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -8,7 +8,7 @@ import io.ktor.server.sessions.*
 import io.ktor.util.pipeline.*
 import io.vallfg.middleware.LfgSession
 import io.vallfg.middleware.sessionIdToPlayerData
-import io.vallfg.responses.LoginResponse
+import io.vallfg.rest.responses.LoginResponse
 import io.vallfg.trn.getPlayerData
 import io.vallfg.trn.player_data.toPlayerData
 import io.vallfg.types.Player

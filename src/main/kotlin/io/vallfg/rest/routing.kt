@@ -1,4 +1,4 @@
-package io.vallfg.handlers
+package io.vallfg.rest
 
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
