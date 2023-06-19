@@ -30,7 +30,8 @@ class PostServer(
     var users: List<User> = emptyList(),
     val messageData: MutableMap<User, MessageData> = mutableMapOf(),
     var messages: List<Message> = emptyList(),
-    val config: PostConfig
+    val config: PostConfig,
+    private val onClosed: () -> Unit,
 ) {
     suspend fun joinPost(
         user: User,
@@ -57,7 +58,7 @@ class PostServer(
         if (data != null) {
             when {
                 data.cooldownUntilEpochSeconds > epochSecond -> {
-                    return MessageError.OnCooldown(data.cooldownUntilEpochSeconds)
+                    return MessageError.OnCooldown(epochSecond - data.cooldownUntilEpochSeconds)
                 }
                 data.messages.size > 10 &&
                 epochSecond - data.messages[data.messages.size - 10]
@@ -83,14 +84,15 @@ class PostServer(
 
     suspend fun banPlayer(
         initiator: User,
-        bozo: User
+        bozo: WsPlayerData
     ): BanError {
         if (initiator == creator) {
-           leavePost(bozo.player.clientId, ban = true)
+           leavePost(bozo.clientId, ban = true)
            return BanError.None
         }
         return BanError.NotCreator
     }
+
 
     suspend fun leavePost(
         clientId: ClientId,
@@ -107,6 +109,27 @@ class PostServer(
                 banned = ban
             )
         )
+        if (leaver.player.clientId == creator.player.clientId) {
+            closePost(leaver.player.clientId)
+        }
+    }
+
+    suspend fun closePost(
+        closer: ClientId
+    ) {
+        if (closer == creator.player.clientId) {
+            notifyAll(
+                PostClosed(
+                    creator.player,
+                    users.map { it.player },
+                    messages,
+                    config.minRank.string,
+                    config.needed,
+                    config.gameMode.string
+                )
+            )
+            onClosed.invoke()
+        }
     }
 
     private suspend fun notifyAll(
@@ -139,7 +162,7 @@ sealed interface MessageError {
     object None: MessageError
 
     object PostNotFound: MessageError
-    data class OnCooldown(val epochSeconds: Long): MessageError
+    data class OnCooldown(val timeLeft: Long): MessageError
 
     object ToQuickly: MessageError
 }

@@ -36,7 +36,6 @@ data class ClosePost(
 @SerialName("PostClosed")
 data class PostClosed(
     val creator: WsPlayerData,
-    var banned: List<WsPlayerData> = emptyList(),
     var users: List<WsPlayerData> = emptyList(),
     var messages: List<Message> = emptyList(),
     val minRank: String,
@@ -68,7 +67,6 @@ data class Error(
 @SerialName("PostState")
 data class PostState(
     val creator: WsPlayerData,
-    var banned: List<WsPlayerData> = emptyList(),
     var users: List<WsPlayerData> = emptyList(),
     var messages: List<Message> = emptyList(),
     val minRank: String,

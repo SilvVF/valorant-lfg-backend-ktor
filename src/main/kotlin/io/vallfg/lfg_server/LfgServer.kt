@@ -22,11 +22,11 @@ typealias ClientId = String
 class LfgServer {
 
     val posts = ConcurrentHashMap<PostId, PostServer>()
-    val users = ConcurrentHashMap<ClientId, PostId>()
-    val deletePostJobs = ConcurrentHashMap<PostId, Job?>()
+    private val users = ConcurrentHashMap<ClientId, PostId>()
+    private val deletePostJobs = ConcurrentHashMap<PostId, Job?>()
 
 
-    suspend fun createPost(
+    suspend fun create(
         config: PostConfig,
         user: User
     ): PostId {
@@ -41,7 +41,12 @@ class LfgServer {
         val ps = PostServer(
             creator = user,
             users = listOf(user),
-            config = config
+            config = config,
+            onClosed = {
+                posts.remove(postId)
+                deletePostJobs[postId]?.cancel()
+                deletePostJobs.remove(postId)
+            }
         )
 
         posts[postId] = ps.also {
@@ -55,25 +60,19 @@ class LfgServer {
         return postId
     }
 
-    suspend fun leavePost(
-        postId: PostId,
+    fun getPostForUser(user: User): PostServer? {
+        val postId = users[user.player.clientId]
+        return posts[postId]
+    }
+    suspend fun leave(
         user: User
     ) {
+        val postId = users[user.player.clientId]
         posts[postId]?.leavePost(user.player.clientId)
         users.remove(user.player.clientId)
     }
 
-    suspend fun sendMessage(
-        text: String,
-        user: User
-    ): MessageError {
-
-        val postId = users[user.player.clientId]
-        val post = posts[postId] ?: return MessageError.PostNotFound
-
-        return post.sendMessage(user, text)
-    }
-    suspend fun joinPost(
+    suspend fun join(
         postId: PostId,
         user: User
     ): JoinPostError {
