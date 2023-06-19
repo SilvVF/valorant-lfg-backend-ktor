@@ -3,121 +3,87 @@ package io.vallfg.lfg_server
 import io.ktor.server.application.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
+import io.vallfg.Time
+import io.vallfg.json
 import io.vallfg.middleware.LfgSession
 import io.vallfg.testUser
-import io.vallfg.types.Message
-import io.vallfg.types.Player
-import io.vallfg.types.PlayerData
+import io.vallfg.types.*
+import io.vallfg.websockets.Message
+import kotlinx.coroutines.*
+import org.jetbrains.exposed.sql.Join
 import java.lang.IllegalStateException
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 typealias PostId = String
 typealias ClientId = String
-class LfgServer(
-    val dev: Boolean
-) {
+class LfgServer {
+
     val posts = ConcurrentHashMap<PostId, PostServer>()
     val users = ConcurrentHashMap<ClientId, PostId>()
+    val deletePostJobs = ConcurrentHashMap<PostId, Job?>()
 
-    init {
-        if (dev) {
-            repeat(100) {
 
-                val  id = UUID.randomUUID().toString()
+    suspend fun createPost(
+        config: PostConfig,
+        user: User
+    ): PostId {
 
-                posts[id] = PostServer(
-                    users = mutableListOf(testUser),
-                    creator = testUser,
-                    config = PostConfig.Builder()
-                        .setGameMode(listOf("competitive", "unrated").random())
-                        .setNeeded((1..4).random())
-                        .setMinRank(listOf("Immortal1", "Unranked","Diamond3").random())
-                        .build()
-                )
-            }
+        // Leave Post if joined already
+        users[user.player.clientId]?.let { joinedPost ->
+            posts[joinedPost]?.leavePost(user.player.clientId)
         }
-    }
-
-
-    fun start(app: Application) = app.configureLfgWebsockets(
-            onJoined = { user, postId ->
-                joinPost(user, user.session.id, postId)
-                    .onSuccess {
-                        user.session.joinedPostId = postId
-                    }
-                    .onFailure {
-                        user.conn.close(
-                            CloseReason(
-                                code = CloseReason.Codes.VIOLATED_POLICY,
-                                message = "failed to join post with postId=[$postId]"
-                            )
-                        )
-                    }
-            },
-            onCreated = { user, needed, minRank, gameMode ->
-                createPost(
-                    user = user,
-                    clientId = user.session.id,
-                    config =  {
-                        setGameMode(gameMode)
-                        setNeeded(needed)
-                        setMinRank(minRank)
-                    }
-                )
-                    .onSuccess { postId ->
-                        user.session.joinedPostId = postId
-                    }
-            },
-            onDisconnect = { user ->
-
-            },
-            onReceived = { user, msg ->
-                when(msg){
-                    is Message -> TODO()
-                }
-            }
-    )
-
-    private suspend fun createPost(
-        user: User,
-        clientId: ClientId,
-        config: PostConfig.Builder.() -> Unit
-    ): Result<String> {
-
+        // Create new post
         val postId = UUID.randomUUID().toString()
 
-        posts[postId] = PostServer(
+        val ps = PostServer(
             creator = user,
-            users = mutableListOf(user),
-            config = PostConfig.Builder().apply(config).build()
+            users = listOf(user),
+            config = config
         )
-        users[clientId] = postId
 
-        return Result.success(postId)
-    }
-
-    private suspend fun joinPost(user: User, clientId: ClientId, postId: PostId): Result<Boolean> {
-
-        val joined = posts[postId]
-            ?.joinPost(user)
-            ?: return Result.failure(IllegalStateException())
-
-        if (!joined) {
-            return Result.failure(IllegalStateException())
+        posts[postId] = ps.also {
+            deletePostJobs[postId] = CoroutineScope(Dispatchers.Default).launch {
+                delay(Time.hour * 2)
+                posts.remove(postId)
+            }
         }
 
-        users[clientId] = postId
-
-        return Result.success(true)
+        users[user.player.clientId] = postId
+        return postId
     }
 
-    suspend fun leavePost(user: User, clientId: ClientId, postId: PostId): Boolean {
+    suspend fun leavePost(
+        postId: PostId,
+        user: User
+    ) {
+        posts[postId]?.leavePost(user.player.clientId)
+        users.remove(user.player.clientId)
+    }
 
-        posts[postId]?.leavePost(user)
+    suspend fun sendMessage(
+        text: String,
+        user: User
+    ): MessageError {
 
-        users.remove(clientId)
+        val postId = users[user.player.clientId]
+        val post = posts[postId] ?: return MessageError.PostNotFound
 
-        return true
+        return post.sendMessage(user, text)
+    }
+    suspend fun joinPost(
+        postId: PostId,
+        user: User
+    ): JoinPostError {
+        // Leave Post if joined already
+        users[user.player.clientId]?.let { joinedPost ->
+            posts[joinedPost]?.leavePost(user.player.clientId)
+        }
+
+        val post = posts[postId] ?: return JoinPostError.NotFound
+
+        return post.joinPost(user)
     }
 }

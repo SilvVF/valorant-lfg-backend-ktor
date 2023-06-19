@@ -1,35 +1,162 @@
 package io.vallfg.lfg_server
 
 import io.ktor.server.websocket.*
+import io.ktor.websocket.*
+import io.vallfg.Time
+import io.vallfg.json
 import io.vallfg.middleware.LfgSession
-import io.vallfg.types.Message
-import io.vallfg.types.Player
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import io.vallfg.types.*
+import io.vallfg.websockets.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 
 data class User(
     val conn: DefaultWebSocketServerSession,
-    val player: Player,
-    val session: LfgSession
+    val player: WsPlayerData
 )
 
+data class MessageData(
+    val messages: MutableList<Message> = mutableListOf(),
+    val cooldownUntilEpochSeconds: Long = 0L,
+)
 
 class PostServer(
-    private val creator: User,
-    private val banned: MutableList<User> = mutableListOf(),
-    val users: MutableList<User>,
-    private val messages: MutableList<Message> = mutableListOf(),
+    val creator: User,
+    var banned: List<ClientId> = emptyList(),
+    var users: List<User> = emptyList(),
+    val messageData: MutableMap<User, MessageData> = mutableMapOf(),
+    var messages: List<Message> = emptyList(),
     val config: PostConfig
 ) {
+    suspend fun joinPost(
+        user: User,
+    ): JoinPostError {
+        when {
+            banned.any { it == user.player.clientId } -> JoinPostError.Banned
+            users.size - 1 == config.needed -> JoinPostError.Full
+            config.minRank.value > Rank.fromString(user.player.rank).value -> JoinPostError.RankToLow
+        }
+        users = users + user
+        notifyAllExcept(
+            user.conn,
+            PlayerJoined(user.player)
+        )
+        return JoinPostError.None
+    }
 
-    private val mutex: Mutex = Mutex()
+    suspend fun sendMessage(
+        sender: User,
+        message: String,
+    ): MessageError {
+        val epochSecond = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+        var data = messageData[sender]
+        if (data != null) {
+            when {
+                data.cooldownUntilEpochSeconds > epochSecond -> {
+                    return MessageError.OnCooldown(data.cooldownUntilEpochSeconds)
+                }
+                data.messages.size > 10 &&
+                epochSecond - data.messages[data.messages.size - 10]
+                    .sentAtEpochSecond < Time.second * 10 -> {
+                    return MessageError.ToQuickly
+                }
+            }
+        } else {
+            data = MessageData()
+            messageData[sender] = data
+        }
+        notifyAll(
+            Message(
+                text = message,
+                sender = sender.player,
+                sentAtEpochSecond = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+            ).also {
+                data.messages.add(it)
+            }
+        )
+        return MessageError.None
+    }
 
-   suspend fun joinPost(user: User): Boolean = mutex.withLock {
-       users.add(user)
+    suspend fun banPlayer(
+        initiator: User,
+        bozo: User
+    ): BanError {
+        if (initiator == creator) {
+           leavePost(bozo.player.clientId, ban = true)
+           return BanError.None
+        }
+        return BanError.NotCreator
+    }
+
+    suspend fun leavePost(
+        clientId: ClientId,
+        ban: Boolean = false
+    ) {
+        val leaver = users.find { it.player.clientId == clientId } ?: return
+        users = users.filter { it.player.clientId != clientId }
+        if (ban) {
+            banned = banned + clientId
+        }
+        notifyAll(
+            PlayerLeft(
+                player = leaver.player,
+                banned = ban
+            )
+        )
+    }
+
+    private suspend fun notifyAll(
+        data: OutWsData
+    ) = CoroutineScope(Dispatchers.IO).launch {
+        for (user in users) {
+            user.conn.send(
+                Frame.Text(
+                    json.encodeToString(OutWsData.serializer(), data)
+                )
+            )
+        }
+    }
+   private suspend fun notifyAllExcept(
+       ignore: DefaultWebSocketServerSession,
+       data: OutWsData
+   ) = CoroutineScope(Dispatchers.IO).launch {
+       for (user in users) {
+           if (user.conn != ignore) {
+               user.conn.send(
+                   Frame.Text(
+                       json.encodeToString(OutWsData.serializer(), data)
+                   )
+               )
+           }
+       }
    }
+}
+sealed interface MessageError {
+    object None: MessageError
 
-   suspend fun leavePost(user: User) = mutex.withLock {
-       users.remove(user)
-   }
+    object PostNotFound: MessageError
+    data class OnCooldown(val epochSeconds: Long): MessageError
+
+    object ToQuickly: MessageError
+}
+sealed interface BanError {
+    object None: BanError
+
+    object NotCreator: BanError
+}
+
+sealed interface JoinPostError {
+    object Banned: JoinPostError
+
+    object NotFound: JoinPostError
+
+    object Full: JoinPostError
+
+    object None: JoinPostError
+
+    object RankToLow: JoinPostError
 }

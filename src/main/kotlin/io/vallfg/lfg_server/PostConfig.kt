@@ -120,38 +120,8 @@ sealed class GameMode(val string: String) {
 }
 
 class PostConfig(
-    createdAt: LocalDateTime
-) {
-
-    var minRank: Rank = Rank.Unranked
-        private set
-    var needed: Int = 1
-        private set
-    var gameMode: GameMode = GameMode.Competitive
-        private set
-
-    var createdAt: LocalDateTime = createdAt
-        private set
-
-    class Builder(private val postConfig: PostConfig = PostConfig(LocalDateTime.now())) {
-
-        fun setMinRank(rank: String): Builder {
-            this.postConfig.minRank = Rank.fromString(rank)
-            return this
-        }
-
-        fun setNeeded(need: Int): Builder {
-            this.postConfig.needed = need.coerceIn(1, 4)
-            return this
-        }
-
-        fun setGameMode(gameMode: String): Builder {
-            this.postConfig.gameMode = GameMode.fromString(gameMode)
-            return this
-        }
-
-        fun build(): PostConfig {
-            return postConfig
-        }
-    }
-}
+    val minRank: Rank = Rank.Unranked,
+    val needed: Int = 1,
+    val gameMode: GameMode = GameMode.Competitive,
+    val createdAt: LocalDateTime = LocalDateTime.now()
+)

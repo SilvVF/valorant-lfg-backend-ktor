@@ -24,9 +24,12 @@ class LoginAsPlayerMutation: Mutation {
             ?: error("unable to get current session")
 
         val session: LfgSession = sessions.get<LfgSession>() ?: run {
-            val newSession = LfgSession(id = UUID.randomUUID().toString(), "")
-            sessions.set("LFG_SESSION", newSession)
-            return@run newSession
+
+            val id = UUID.randomUUID().toString()
+
+            val newSession = LfgSession(id, "")
+            sessions.set<LfgSession>(newSession)
+            newSession
         }
 
         val playerData = getPlayerData(name, tag).getRankedDataOrNull(name, tag)
@@ -42,6 +45,8 @@ class LoginAsPlayerMutation: Mutation {
         )
 
         sessionIdToPlayerData[session.id] = player
+
+
         return player
     }
 }

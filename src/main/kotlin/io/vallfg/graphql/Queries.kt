@@ -64,7 +64,7 @@ class PostQuery: Query {
             gameMode = config.gameMode.string,
             needed = config.needed,
             players = postServer.users.map { listOf(it.player.name, it.player.tag) },
-            createdAt = config.createdAt.format(DateTimeFormatter.ISO_DATE_TIME)
+            createdAtEpochSecond = postServer.config.createdAt.toEpochSecond(ZoneOffset.UTC).toDouble()
         )
     }
 }
